@@ -1,0 +1,40 @@
+name: DevSecOps-Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    name: Build & Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 1. Build the image locally for scanning
+      - name: Build Docker Image
+        run: |
+          docker build -t my-app:latest .
+
+      # 2. RUN TRIVY SCAN (Container Vulnerability)
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'my-app:latest'
+          format: 'table'
+          exit-code: '1' # Fail the build if vulnerabilities are found
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      # 3. SUCCESS MESSAGE
+      - name: Deployment Ready
+        if: success()
+        run: echo "Vulnerability scan passed! Image is ready for deployment."
