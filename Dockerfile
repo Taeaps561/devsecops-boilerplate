@@ -1,12 +1,12 @@
-# Build stage (SIMULATING VULNERABILITY: Using old, insecure base)
-FROM python:3.7-slim as builder
+# Build stage (FIXED: Using secure, modern base)
+FROM python:3.12-slim as builder
 
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --user --no-cache-dir -r requirements.txt
 
-# Final stage (SIMULATING VULNERABILITY: Using old, insecure base)
-FROM python:3.7-slim
+# Final stage (FIXED: Using secure, modern base)
+FROM python:3.12-slim
 
 # Security: Run as non-root user
 RUN groupadd -r appuser && useradd -r -g appuser appuser
